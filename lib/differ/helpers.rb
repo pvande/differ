@@ -10,14 +10,14 @@ module Differ
       return if str.empty?
       last = @results.last
       @results.push(last = Change.new) unless last.is_a?(Change)
-      last.del << str.join
+      last.delete << str.join
     end
 
     def insert(*str)
       return if str.empty?
       last = @results.last
       @results.push(last = Change.new) unless last.is_a?(Change)
-      last.add << str.join
+      last.insert << str.join
     end
   end
 end

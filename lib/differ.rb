@@ -1,23 +1,7 @@
-require 'ostruct'
 require 'differ/helpers'
+require 'differ/change'
 
 module Differ
-  class Change < OpenStruct
-    def initialize(options = {})
-      super({ :add => '', :del => '' }.merge(options))
-    end
-
-    def inspect
-      if !add.empty? && !del.empty?
-        "{#{del.inspect} >> #{add.inspect}}"
-      elsif !add.empty?
-        "+#{add.inspect}"
-      elsif !del.empty?
-        "-#{del.inspect}"
-      end
-    end
-  end
-
   class << self
     include Helpers
 

@@ -10,14 +10,14 @@ end
 
 class String
   def +@
-    Differ::Change.new(:add => self)
+    Differ::Change.new(:insert => self)
   end
 
   def -@
-    Differ::Change.new(:del => self)
+    Differ::Change.new(:delete => self)
   end
 
   def >>(to)
-    Differ::Change.new(:del => self, :add => to)
+    Differ::Change.new(:delete => self, :insert => to)
   end
 end
