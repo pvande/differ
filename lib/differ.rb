@@ -7,6 +7,7 @@ module Differ
 
     def diff(target, source, separator)
       old_sep, $; = $;, separator
+      $; = nil if separator.is_a? Regexp
       @results = []
 
       target = target.split(separator)
@@ -21,6 +22,10 @@ module Differ
 
     def diff_by_char(to, from)
       diff(to, from, '')
+    end
+
+    def diff_by_word(to, from)
+      diff(to, from, /\b/)
     end
 
   private
