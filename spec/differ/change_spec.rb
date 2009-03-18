@@ -79,6 +79,8 @@ describe Differ::Change do
       @change.to_s.should == 'FORMAT'
     end
 
+    it { (@change).should be_an_insert }
+    it { (@change).should be_a_delete }
     it { (@change).should be_a_change }
   end
 end

@@ -8,6 +8,12 @@ Spec::Runner.configure do |config|
 
 end
 
+def diff(*parts)
+  x = Differ::Diff.new
+  x.instance_variable_set(:@raw, parts)
+  return x
+end
+
 class String
   def +@
     Differ::Change.new(:insert => self)

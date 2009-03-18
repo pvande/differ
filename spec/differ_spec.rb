@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Differ do
   describe '#diff_by_char' do
-    def diff
+    def diff_by_char
       Differ.send(:diff_by_char, @to, @from)
     end
 
@@ -11,74 +11,74 @@ describe Differ do
     end
 
     it 'should hande no-change situations' do
-      @expected = [ 'self' ]
-      diff.should == @expected
+      @expected = diff('self')
+      diff_by_char.should == @expected
     end
 
     it 'should handle prepends' do
       @to = "myself"
-      @expected = [ +'my', 'self' ]
-      diff.should == @expected
+      @expected = diff(+'my', 'self')
+      diff_by_char.should == @expected
     end
 
     it 'should handle appends' do
       @to = 'self-interest'
-      @expected = [ 'self', +'-interest' ]
-      diff.should == @expected
+      @expected = diff('self', +'-interest')
+      diff_by_char.should == @expected
     end
 
     it 'should handle leading deletes' do
       @to = 'elf'
-      @expected = [ -'s', 'elf' ]
-      diff.should == @expected
+      @expected = diff(-'s', 'elf')
+      diff_by_char.should == @expected
     end
 
     it 'should handle trailing deletes' do
       @to = 'sel'
-      @expected = [ 'sel', -'f' ]
-      diff.should == @expected
+      @expected = diff('sel', -'f')
+      diff_by_char.should == @expected
     end
 
     it 'should handle simultaneous leading changes' do
       @to = 'wood-elf'
-      @expected = [ ('s' >> 'wood-'), 'elf' ]
-      diff.should == @expected
+      @expected = diff(('s' >> 'wood-'), 'elf')
+      diff_by_char.should == @expected
     end
 
     it 'should handle simultaneous trailing changes' do
       @to = "seasoning"
-      @expected = [ 'se', ('lf' >> 'asoning') ]
-      diff.should == @expected
+      @expected = diff('se', ('lf' >> 'asoning'))
+      diff_by_char.should == @expected
     end
 
     it 'should handle full-string changes' do
       @to = 'turgid'
-      @expected = [ ('self' >> 'turgid') ]
-      diff.should == @expected
+      @expected = diff('self' >> 'turgid')
+      diff_by_char.should == @expected
     end
 
     it 'should handle complex string additions' do
       @to = 'my sleeplife'
-      @expected = [ +'my ', 's', +'l', 'e', +'ep', 'l', +'i', 'f', +'e' ]
-      diff.should == @expected
+      @expected = diff(+'my ', 's', +'l', 'e', +'ep', 'l', +'i', 'f', +'e')
+      diff_by_char.should == @expected
     end
 
     it 'should handle complex string deletions' do
       @from = 'my sleeplife'
-      @expected = [ -'my ', 's', -'l', 'e', -'ep', 'l', -'i', 'f', -'e' ]
-      diff.should == @expected
+      @expected = diff(-'my ', 's', -'l', 'e', -'ep', 'l', -'i', 'f', -'e')
+      diff_by_char.should == @expected
     end
 
     it 'should handle complex string changes' do
       @from = 'my sleeplife'
       @to = 'seasonal'
-      @expected = [ -'my ', 's', -'l', 'e', ('ep' >> 'asona'), 'l', -'ife' ]
-      diff.should == @expected
+      @expected = diff(-'my ', 's', -'l', 'e', ('ep' >> 'asona'), 'l', -'ife')
+      diff_by_char.should == @expected
     end
   end
 
   describe '#diff_by_word' do
-    def diff
+    def diff_by_word
       Differ.send(:diff_by_word, @to, @from)
     end
 
@@ -87,49 +87,49 @@ describe Differ do
     end
 
     it 'should hande no-change situations' do
-      @expected = [ 'the daylight will come' ]
-      diff.should == @expected
+      @expected = diff('the daylight will come')
+      diff_by_word.should == @expected
     end
 
     it 'should handle prepends' do
       @to = "surely the daylight will come"
-      @expected = [ +'surely ', 'the daylight will come' ]
-      diff.should == @expected
+      @expected = diff(+'surely ', 'the daylight will come')
+      diff_by_word.should == @expected
     end
 
     it 'should handle appends' do
       @to = 'the daylight will come in the morning'
-      @expected = [ 'the daylight will come', +' in the morning' ]
-      diff.should == @expected
+      @expected = diff('the daylight will come', +' in the morning')
+      diff_by_word.should == @expected
     end
 
     it 'should handle leading deletes' do
       @to = 'daylight will come'
-      @expected = [ -'the ', 'daylight will come' ]
-      diff.should == @expected
+      @expected = diff(-'the ', 'daylight will come')
+      diff_by_word.should == @expected
     end
 
     it 'should handle trailing deletes' do
       @to = 'the daylight'
-      @expected = [ 'the daylight', -' will come' ]
-      diff.should == @expected
+      @expected = diff('the daylight', -' will come')
+      diff_by_word.should == @expected
     end
 
     it 'should handle simultaneous leading changes' do
       @to = 'some daylight will come'
-      @expected = [ ('the' >> 'some'), ' daylight will come' ]
-      diff.should == @expected
+      @expected = diff(('the' >> 'some'), ' daylight will come')
+      diff_by_word.should == @expected
     end
 
     it 'should handle simultaneous trailing changes' do
       @to = "the daylight will flood the room"
-      @expected = [ 'the daylight will ', ('come' >> 'flood the room') ]
-      diff.should == @expected
+      @expected = diff('the daylight will ', ('come' >> 'flood the room'))
+      diff_by_word.should == @expected
     end
 
     it 'should handle full-string changes' do
       @to = 'if we should expect it'
-      @expected = [
+      @expected = diff(
         ('the' >> 'if'),
         ' ',
         ('daylight' >> 'we'),
@@ -137,26 +137,26 @@ describe Differ do
         ('will' >> 'should'),
         ' ',
         ('come' >> 'expect it')
-      ]
-      diff.should == @expected
+      )
+      diff_by_word.should == @expected
     end
 
     it 'should handle complex string additions' do
       @to = 'the fresh daylight will surely come'
-      @expected = [ 'the ', +'fresh ', 'daylight will ', +'surely ', 'come' ]
-      diff.should == @expected
+      @expected = diff('the ', +'fresh ', 'daylight will ', +'surely ', 'come')
+      diff_by_word.should == @expected
     end
 
     it 'should handle complex string deletions' do
       @from = 'the fresh daylight will surely come'
-      @expected = [ 'the ', -'fresh ', 'daylight will ', -'surely ', 'come' ]
-      diff.should == @expected
+      @expected = diff('the ', -'fresh ', 'daylight will ', -'surely ', 'come')
+      diff_by_word.should == @expected
     end
 
     it 'should handle complex string changes' do
       @from = 'the fresh daylight will surely come'
       @to = 'something fresh will become surly'
-      @expected = [
+      @expected = diff(
         ('the' >> 'something'),
         ' fresh ',
         -'daylight ',
@@ -164,8 +164,8 @@ describe Differ do
         ( 'surely' >> 'become'),
         ' ',
         ( 'come' >> 'surly' )
-      ]
-      diff.should == @expected
+      )
+      diff_by_word.should == @expected
     end
   end
 end

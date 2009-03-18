@@ -7,11 +7,11 @@ module Differ
     end
 
     def insert?
-      !@insert.empty? && @delete.empty?
+      !@insert.empty?
     end
 
     def delete?
-      @insert.empty? && !@delete.empty?
+      !@delete.empty?
     end
 
     def change?
@@ -23,9 +23,9 @@ module Differ
     def as_change ; "{#{@delete.inspect} >> #{@insert.inspect}}" ; end
 
     def to_s
+      (change? && self.as_change) ||
       (insert? && self.as_insert) ||
       (delete? && self.as_delete) ||
-      (change? && self.as_change) ||
       ''
     end
     alias :inspect :to_s
