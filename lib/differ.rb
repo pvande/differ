@@ -1,5 +1,8 @@
 require 'differ/change'
 require 'differ/diff'
+require 'differ/format/ascii'
+require 'differ/format/color'
+require 'differ/format/html'
 
 module Differ
   class << self
@@ -30,6 +33,25 @@ module Differ
 
     def diff_by_line(to, from)
       diff(to, from, "\n")
+    end
+
+    def format=(f)
+      @format = format_for(f)
+    end
+
+    def format
+      return @format || Format::Ascii
+    end
+
+    def format_for(f)
+      case f
+      when Module then f
+      when :ascii then Format::Ascii
+      when :color then Format::Color
+      when :html  then Format::HTML
+      when nil    then nil
+      else raise "Unknown format type #{f.inspect}"
+      end
     end
 
   private

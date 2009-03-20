@@ -7,6 +7,10 @@ describe Differ::Diff do
   end
 
   describe '#to_s' do
+    before(:each) do
+      @format = Differ.format
+    end
+
     it 'should concatenate the result list' do
       diff('a', 'b', 'c').to_s.should == 'abc'
     end
@@ -16,22 +20,28 @@ describe Differ::Diff do
       diff('a', 'b', 'c').to_s.should == 'abc'
     end
 
-    it 'should delegate insertion changes to the Change class' do
+    it 'should delegate insertion changes to Differ#format' do
       i = +'b'
-      i.should_receive(:as_insert).once.and_return('!')
+      @format.should_receive(:format).once.with(i).and_return('!')
       diff('a', i, 'c').to_s.should == 'a!c'
     end
+  end
 
-    it 'should delegate deletion changes to the Change class' do
-      d = -'b'
-      d.should_receive(:as_delete).once.and_return('!')
-      diff('a', d, 'c').to_s.should == 'a!c'
+  describe '#format_as' do
+    before(:each) do
+      @change = +'b'
+      Differ.format = Module.new { def self.format(c); raise :error; end }
+      @format = Module.new { def self.format(c); end }
     end
 
-    it 'should delegate replacement changes to the Change class' do
-      r = ('b' >> 'd')
-      r.should_receive(:as_change).once.and_return('!')
-      diff('a', r, 'c').to_s.should == 'a!c'
+    it 'should delegate change formatting to the given format' do
+      @format.should_receive(:format).once.with(@change).and_return('!')
+      diff('a', @change, 'c').format_as(@format).should == 'a!c'
+    end
+
+    it 'should use Differ#format_for to grab the correct format' do
+      Differ.should_receive(:format_for).once.with(@format)
+      diff().format_as(@format)
     end
   end
 

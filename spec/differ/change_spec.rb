@@ -1,6 +1,11 @@
 require 'spec_helper'
 
 describe Differ::Change do
+  before(:each) do
+    @format = Module.new { def self.format(c); end }
+    Differ.format = @format
+  end
+
   describe '(empty)' do
     before(:each) do
       @change = Differ::Change.new()
@@ -15,6 +20,7 @@ describe Differ::Change do
     end
 
     it 'should stringify to ""' do
+      @format.should_receive(:format).once.and_return('')
       @change.to_s.should == ''
     end
   end
@@ -30,11 +36,6 @@ describe Differ::Change do
 
     it 'should have a default delete' do
       @change.delete.should == ''
-    end
-
-    it 'should stringify via the #as_insert method' do
-      @change.should_receive(:as_insert).once.and_return('FORMAT')
-      @change.to_s.should == 'FORMAT'
     end
 
     it { (@change).should be_an_insert }
@@ -53,11 +54,6 @@ describe Differ::Change do
       @change.delete.should == 'bar'
     end
 
-    it 'should stringify via the #as_delete method' do
-      @change.should_receive(:as_delete).once.and_return('FORMAT')
-      @change.to_s.should == 'FORMAT'
-    end
-
     it { (@change).should be_a_delete }
   end
 
@@ -74,13 +70,13 @@ describe Differ::Change do
       @change.delete.should == 'bar'
     end
 
-    it 'should stringify via the #as_change method' do
-      @change.should_receive(:as_change).once.and_return('FORMAT')
-      @change.to_s.should == 'FORMAT'
-    end
-
     it { (@change).should be_an_insert }
     it { (@change).should be_a_delete }
     it { (@change).should be_a_change }
+  end
+
+  it "should stringify via the current format's #format method" do
+    @format.should_receive(:format).once
+    Differ::Change.new.to_s
   end
 end

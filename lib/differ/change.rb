@@ -18,15 +18,8 @@ module Differ
       !@insert.empty? && !@delete.empty?
     end
 
-    def as_insert ; "+#{@insert.inspect}" ; end
-    def as_delete ; "-#{@delete.inspect}" ; end
-    def as_change ; "{#{@delete.inspect} >> #{@insert.inspect}}" ; end
-
     def to_s
-      (change? && self.as_change) ||
-      (insert? && self.as_insert) ||
-      (delete? && self.as_delete) ||
-      ''
+      Differ.format.format(self)
     end
     alias :inspect :to_s
 

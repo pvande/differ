@@ -69,9 +69,17 @@ If you would like something a little more inline...
 
 Need a different output format?  We've got a few of those too.
 
-  Differ.format(:ascii)  # <- Default
-  Differ.format(:color)
-  Differ.format(:html)
+  Differ.format = :ascii  # <- Default
+  Differ.format = :color
+  Differ.format = :html
+
+  Differ.format = MyCustomFormatModule
+
+Don't want to change the system-wide default for only a single diff output?
+Yeah, me either.
+
+  @diff = (@current - @original)
+  @diff.format_as(:color)
 
 == Copyright
 

@@ -1,6 +1,65 @@
 require 'spec_helper'
 
 describe Differ do
+  describe '#format' do
+    before(:each) { Differ.format = nil }
+
+    it 'should return the last value it was set to' do
+      Differ.format = Differ::Format::HTML
+      Differ.format.should == Differ::Format::HTML
+    end
+
+    it 'should default to Differ::Format::Ascii' do
+      Differ.format.should == Differ::Format::Ascii
+    end
+  end
+
+  describe '#format=' do
+    it 'should call #format_for with the passed argument' do
+      Differ.should_receive(:format_for).with(:format).once
+      Differ.format = :format
+    end
+
+    it 'should raise an error on undefined behavior' do
+      lambda {
+        Differ.format = 'threeve'
+      }.should raise_error('Unknown format type "threeve"')
+    end
+  end
+
+  describe '#format_for' do
+    before(:each) { Differ.format = nil }
+
+    it 'should store any module passed to it' do
+      formatter = Module.new
+      Differ.format_for(formatter).should == formatter
+    end
+
+    it 'should permit nil (default behavior)' do
+      Differ.format_for(nil).should == nil
+    end
+
+    it 'should raise an error on undefined behavior' do
+      lambda {
+        Differ.format_for('threeve')
+      }.should raise_error('Unknown format type "threeve"')
+    end
+
+    describe 'when passed a symbol' do
+      it 'should translate the symbol :ascii into Differ::Format::Ascii' do
+        Differ.format_for(:ascii).should == Differ::Format::Ascii
+      end
+
+      it 'should translate the symbol :color into Differ::Format::Color' do
+        Differ.format_for(:color).should == Differ::Format::Color
+      end
+
+      it 'should translate the symbol :html into Differ::Format::HTML' do
+        Differ.format_for(:html).should == Differ::Format::HTML
+      end
+    end
+  end
+
   describe '#diff_by_char' do
     def diff_by_char
       Differ.send(:diff_by_char, @to, @from)

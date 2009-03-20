@@ -71,6 +71,17 @@ module Differ
       @raw.to_s
     end
 
+    def format_as(f)
+      f = Differ.format_for(f)
+      @raw.inject('') do |sum, part|
+        part = case part
+        when String then part
+        when Change then f.format(part)
+        end
+        sum << part
+      end
+    end
+
   protected
     def raw_array
       @raw
