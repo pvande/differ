@@ -69,20 +69,75 @@ describe Differ::Diff do
       end
     end
 
-    describe 'when the last result was not a String' do
+    describe 'when the last result was a change' do
       before(:each) do
-        @diff = diff(1)
+        @diff = diff('z' >> 'd')
       end
 
       it 'should append to the result list' do
         @diff.same('a')
-        @diff.should == diff(1, 'a')
+        @diff.should == diff(('z' >> 'd'), 'a')
       end
 
-      it 'should prepend the result with $;' do
+      it 'should prepend $; to the result' do
         $; = '*'
         @diff.same('a')
-        @diff.should == diff(1, '*a')
+        @diff.should == diff(('z' >> 'd'), '*a')
+      end
+
+      it "should do nothing to a leading $; on the insert" do
+        @diff = diff('a', ('*-' >> '*+'))
+        $; = '*'
+        @diff.same('c')
+        @diff.should == diff('a', ('*-' >> '*+'), '*c')
+      end
+    end
+
+    describe 'when the last result was just a delete' do
+      before(:each) do
+        @diff = diff(-'z')
+      end
+
+      it 'should append to the result list' do
+        @diff.same('a')
+        @diff.should == diff(-'z', 'a')
+      end
+
+      it 'should append $; to the previous result' do
+        $; = '*'
+        @diff.same('a')
+        @diff.should == diff(-'z*', 'a')
+      end
+
+      it "should relocate a leading $; on the delete to the previous item" do
+        @diff = diff('a', -'*b')
+        $; = '*'
+        @diff.same('c')
+        @diff.should == diff('a*', -'b*', 'c')
+      end
+    end
+
+    describe 'when the last result was just an insert' do
+      before(:each) do
+        @diff = diff(+'z')
+      end
+
+      it 'should append to the result list' do
+        @diff.same('a')
+        @diff.should == diff(+'z', 'a')
+      end
+
+      it 'should append $; to the previous result' do
+        $; = '*'
+        @diff.same('a')
+        @diff.should == diff(+'z*', 'a')
+      end
+
+      it "should relocate a leading $; on the insert to the previous item" do
+        @diff = diff('a', +'*b')
+        $; = '*'
+        @diff.same('c')
+        @diff.should == diff('a*', +'b*', 'c')
       end
     end
   end
@@ -127,9 +182,16 @@ describe Differ::Diff do
           @diff = diff(+'a')
         end
 
-        it "should not change the 'insert' portion of the last result" do
+        it "should turn the insert into a change" do
           @diff.delete('b')
           @diff.should == diff('b' >> 'a')
+        end
+
+        it "should relocate a leading $; on the insert to the previous item" do
+          @diff = diff('a', +'*b')
+          $; = '*'
+          @diff.delete('z')
+          @diff.should == diff('a*', ('z' >> 'b'))
         end
       end
     end
@@ -144,10 +206,10 @@ describe Differ::Diff do
         @diff.should == diff('a', -'b')
       end
 
-      it 'should append $; to the previous result' do
+      it 'should prepend $; to the result' do
         $; = '*'
         @diff.delete('b')
-        @diff.should == diff('a*', -'b')
+        @diff.should == diff('a', -'*b')
       end
     end
   end
@@ -179,6 +241,13 @@ describe Differ::Diff do
           @diff.insert('a')
           @diff.should == diff('b' >> 'a')
         end
+
+        it "should relocate a leading $; on the delete to the previous item" do
+          @diff = diff('a', -'*b')
+          $; = '*'
+          @diff.insert('z')
+          @diff.should == diff('a*', ('b' >> 'z'))
+        end
       end
 
       describe '(insert)' do
@@ -209,10 +278,10 @@ describe Differ::Diff do
         @diff.should == diff('a', +'b')
       end
 
-      it 'should append $; to the previous result' do
+      it 'should prepend $; to the result' do
         $; = '*'
         @diff.insert('b')
-        @diff.should == diff('a*', +'b')
+        @diff.should == diff('a', +'*b')
       end
     end
   end

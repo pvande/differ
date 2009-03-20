@@ -168,4 +168,286 @@ describe Differ do
       diff_by_word.should == @expected
     end
   end
+
+  describe '#diff_by_line' do
+    def diff_by_line
+      Differ.send(:diff_by_line, @to, @from)
+    end
+
+    before(:each) do
+      @to = @from = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        stallion sinks gently
+        slowly, sleeplessly
+        following harp flails
+      HAIKU
+    end
+
+    it 'should hande no-change situations' do
+      @expected = diff(@to)
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle prepends' do
+      @to = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        A Haiku:
+        stallion sinks gently
+        slowly, sleeplessly
+        following harp flails
+      HAIKU
+      @expected = diff(+"A Haiku:\n", @from)
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle appends' do
+      @to = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        stallion sinks gently
+        slowly, sleeplessly
+        following harp flails
+        -- http://everypoet.net
+      HAIKU
+      @expected = diff(@from, +"\n-- http://everypoet.net")
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle leading deletes' do
+      @from = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        A Haiku:
+        stallion sinks gently
+        slowly, sleeplessly
+        following harp flails
+      HAIKU
+      @expected = diff(-"A Haiku:\n", @to)
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle trailing deletes' do
+      @from = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        stallion sinks gently
+        slowly, sleeplessly
+        following harp flails
+        -- http://everypoet.net
+      HAIKU
+      @expected = diff(@to, -"\n-- http://everypoet.net")
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle simultaneous leading changes' do
+      @to = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        stallion sings gently
+        slowly, sleeplessly
+        following harp flails
+      HAIKU
+      @expected = diff(
+        ('stallion sinks gently' >> 'stallion sings gently'),
+        "\nslowly, sleeplessly" <<
+        "\nfollowing harp flails"
+      )
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle simultaneous trailing changes' do
+      @to = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        stallion sinks gently
+        slowly, sleeplessly
+        drifting ever on
+      HAIKU
+      @expected = diff(
+        "stallion sinks gently\n" <<
+        "slowly, sleeplessly\n",
+        ('following harp flails' >> 'drifting ever on')
+      )
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle full-string changes' do
+      @to = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        glumly inert coals
+        slumber lazily, shoulda
+        used more Burma Shave
+      HAIKU
+      @expected = diff(@from >> @to)
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle complex string additions' do
+      @to = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        A Haiku, with annotation:
+        stallion sinks gently
+        slowly, sleeplessly
+        (flailing)
+        following harp flails
+        -- modified from source
+      HAIKU
+      @expected = diff(
+        +"A Haiku, with annotation:\n",
+        "stallion sinks gently\n" <<
+        "slowly, sleeplessly\n",
+        +"(flailing)\n",
+        'following harp flails',
+        +"\n-- modified from source"
+      )
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle complex string deletions' do
+      @from = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        A Haiku, with annotation:
+        stallion sinks gently
+        slowly, sleeplessly
+        (flailing)
+        following harp flails
+        -- modified from source
+      HAIKU
+      @expected = diff(
+        -"A Haiku, with annotation:\n",
+        "stallion sinks gently\n" <<
+        "slowly, sleeplessly\n",
+        -"(flailing)\n",
+        'following harp flails',
+        -"\n-- modified from source"
+      )
+      diff_by_line.should == @expected
+    end
+
+    it 'should handle complex string changes' do
+      @to = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        stallion sings gently
+        slowly, sleeplessly
+        (flailing)
+        following harp flails
+        -- modified from source
+      HAIKU
+      @expected = diff(
+        ('stallion sinks gently' >> 'stallion sings gently'),
+        "\nslowly, sleeplessly\n",
+        +"(flailing)\n",
+        'following harp flails',
+        +"\n-- modified from source"
+      )
+      diff_by_line.should == @expected
+    end
+  end
+
+  describe '#diff (with arbitrary boundary)' do
+    def diff_by_comma
+      Differ.send(:diff, @to, @from, ', ')
+    end
+
+    before(:each) do
+      @to = @from = 'alteration, asymmetry, a deviation'
+    end
+
+    it 'should hande no-change situations' do
+      @expected = diff('alteration, asymmetry, a deviation')
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle prepends' do
+      @to = "aberration, alteration, asymmetry, a deviation"
+      @expected = diff(+'aberration, ', 'alteration, asymmetry, a deviation')
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle appends' do
+      @to = "alteration, asymmetry, a deviation, change"
+      @expected = diff('alteration, asymmetry, a deviation', +', change')
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle leading deletes' do
+      @to = 'asymmetry, a deviation'
+      @expected = diff(-'alteration, ', 'asymmetry, a deviation')
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle trailing deletes' do
+      @to = 'alteration, asymmetry'
+      @expected = diff('alteration, asymmetry', -', a deviation')
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle simultaneous leading changes' do
+      @to = 'aberration, asymmetry, a deviation'
+      @expected = diff(('alteration' >> 'aberration'), ', asymmetry, a deviation')
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle simultaneous trailing changes' do
+      @to = 'alteration, asymmetry, change'
+      @expected = diff('alteration, asymmetry, ', ('a deviation' >> 'change'))
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle full-string changes' do
+      @to = 'uniformity, unison, unity'
+      @expected = diff(@from >> @to)
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle complex string additions' do
+      @to = 'aberration, alteration, anomaly, asymmetry, a deviation, change'
+      @expected = diff(
+        +'aberration, ',
+        'alteration, ',
+        +'anomaly, ',
+        'asymmetry, a deviation',
+        +', change'
+      )
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle complex string deletions' do
+      @from = 'aberration, alteration, anomaly, asymmetry, a deviation, change'
+      @expected = diff(
+        -'aberration, ',
+        'alteration, ',
+        -'anomaly, ',
+        'asymmetry, a deviation',
+        -', change'
+      )
+      diff_by_comma.should == @expected
+    end
+
+    it 'should handle complex string changes' do
+      @from = 'a, d, g, gh, x'
+      @to = 'a, b, c, d, e, f, g, h, i, j'
+      @expected = diff(
+        'a, ',
+        +'b, c, ',
+        'd, ',
+        +'e, f, ',
+        'g, ',
+        ('gh, x' >> 'h, i, j')
+      )
+      diff_by_comma.should == @expected
+    end
+  end
+
+  describe '#diff (with implied boundary)' do
+    def diff_by_line
+      Differ.send(:diff, @to, @from)
+    end
+
+    before(:each) do
+      @to = @from = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        stallion sinks gently
+        slowly, sleeplessly
+        following harp flails
+      HAIKU
+    end
+
+    it 'should do diffs by line' do
+      @to = <<-HAIKU.gsub(/  +|\n\Z/, '')
+        stallion sinks gently
+        slowly, restlessly
+        following harp flails
+      HAIKU
+      @expected = diff(
+        "stallion sinks gently\n",
+        ('slowly, sleeplessly' >> 'slowly, restlessly'),
+        "\nfollowing harp flails"
+      )
+      diff_by_line.should == @expected
+    end
+  end
 end

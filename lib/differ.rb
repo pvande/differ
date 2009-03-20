@@ -4,13 +4,13 @@ require 'differ/diff'
 module Differ
   class << self
 
-    def diff(target, source, separator)
+    def diff(target, source, separator = "\n")
       old_sep, $; = $;, separator
 
       target = target.split(separator)
       source = source.split(separator)
 
-      $; = $~ if separator.is_a? Regexp
+      $; = '' if separator.is_a? Regexp
 
       @diff = Diff.new
       advance(target, source) until source.empty? || target.empty?
@@ -26,6 +26,10 @@ module Differ
 
     def diff_by_word(to, from)
       diff(to, from, /\b/)
+    end
+
+    def diff_by_line(to, from)
+      diff(to, from, "\n")
     end
 
   private

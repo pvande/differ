@@ -41,7 +41,7 @@ There are a number of built-in diff methods to choose from...
 
 ... or call #diff directly and supply your own boundary string!
 
-  @diff = Differ.diff(@current, @original)
+  @diff = Differ.diff(@current, @original)  # implicitly by line!
     # => "{"Epic lolcat fail!" >> "Epic wolfman fail!"}"
 
   @diff = Differ.diff(@current, @original, 'i')
@@ -51,12 +51,12 @@ If you would like something a little more inline...
 
   require 'differ/string'
 
-  @diff = @current.diff(@original)
+  @diff = @current.diff(@original)  # implicitly by line!
     # => "{"Epic lolcat fail!" >> "Epic wolfman fail!"}"
 
 ... or a lot more inline...
 
-  @diff = (@current - @original)
+  @diff = (@current - @original)    # implicitly by line!
     # => "{"Epic lolcat fail!" >> "Epic wolfman fail!"}"
 
   $; = ' '

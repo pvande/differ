@@ -8,8 +8,25 @@ module Differ
       return if str.empty?
       if @raw.last.is_a? String
         @raw.last << sep
+      elsif @raw.last.is_a? Change
+        if @raw.last.change?
+          @raw << sep
+        else
+          change = @raw.pop
+          if change.insert? && @raw.last
+            @raw.last << sep if change.insert.sub!(/^#{Regexp.quote(sep)}/, '')
+          end
+          if change.delete? && @raw.last
+            @raw.last << sep if change.delete.sub!(/^#{Regexp.quote(sep)}/, '')
+          end
+          @raw << change
+
+          @raw.last.insert << sep if @raw.last.insert?
+          @raw.last.delete << sep if @raw.last.delete?
+          @raw << ''
+        end
       else
-        @raw << (@raw.empty? ? '' : sep)
+        @raw << ''
       end
       @raw.last << str.join(sep)
     end
@@ -17,22 +34,32 @@ module Differ
     def delete(*str)
       return if str.empty?
       if @raw.last.is_a? Change
-        @raw.last.delete << sep if @raw.last.delete?
+        change = @raw.pop
+        if change.insert? && @raw.last
+          @raw.last << sep if change.insert.sub!(/^#{Regexp.quote(sep)}/, '')
+        end
+        change.delete << sep if change.delete?
       else
-        (@raw.last || '') << sep
-        @raw << (Change.new)
+        change = Change.new(:delete => @raw.empty? ? '' : sep)
       end
+
+      @raw << change
       @raw.last.delete << str.join(sep)
     end
 
     def insert(*str)
       return if str.empty?
       if @raw.last.is_a? Change
-        @raw.last.insert << sep if @raw.last.insert?
+        change = @raw.pop
+        if change.delete? && @raw.last
+          @raw.last << sep if change.delete.sub!(/^#{Regexp.quote(sep)}/, '')
+        end
+        change.insert << sep if change.insert?
       else
-        (@raw.last || '') << sep
-        @raw << (Change.new)
+        change = Change.new(:insert => @raw.empty? ? '' : sep)
       end
+
+      @raw << change
       @raw.last.insert << str.join(sep)
     end
 
