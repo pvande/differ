@@ -3,12 +3,11 @@ require 'rake'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "Differ"
-    gem.summary = %Q{TODO}
+    gem.name = "differ"
+    gem.summary = "A simple gem for generating string diffs"
     gem.email = "pvande@gmail.com"
     gem.homepage = "http://github.com/pvande/differ"
     gem.authors = [ "Pieter Vande Bruggen" ]
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
