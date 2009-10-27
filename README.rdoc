@@ -15,7 +15,7 @@ ones are built-in), and can be output in a variety of formats.
 
 == Installation
 
-  sudo gem install pvande-differ --source http://gems.github.com
+  sudo gem install differ
 
 == Usage
 
