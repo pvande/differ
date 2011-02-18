@@ -7,10 +7,10 @@ begin
     gem.summary = "A simple gem for generating string diffs"
     gem.email = "pvande@gmail.com"
     gem.homepage = "http://github.com/pvande/differ"
-    gem.authors = [ "Pieter Vande Bruggen" ]
+    gem.authors = [ "Pieter van de Bruggen" ]
   end
 rescue LoadError
-  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
+  puts "Jeweler not available. Install it with: gem install jeweler"
 end
 
 require 'rake/rdoctask'
