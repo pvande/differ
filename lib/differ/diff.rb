@@ -68,7 +68,7 @@ module Differ
     end
 
     def to_s
-      @raw.to_s
+      @raw.join
     end
 
     def format_as(f)
